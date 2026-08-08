@@ -1,0 +1,6 @@
+{
+  "name": "Lottus Designers",
+  "description": "Premium luxury event planning and design company based in Medellín, Colombia. Specializing in breathtaking weddings, custom floral installations, and unforgettable celebrations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
