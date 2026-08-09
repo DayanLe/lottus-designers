@@ -8,6 +8,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig(() => {
   return {
+    base: process.env.GITHUB_PAGES ? '/lottus-designers/' : '/',
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
