@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { X, Trash2, Download, ExternalLink, CalendarDays, Inbox, ShieldCheck, FileCode, Globe } from "lucide-react";
+import { X, Trash2, Download, ExternalLink, CalendarDays, Inbox, ShieldCheck, FileCode, Globe, Lock } from "lucide-react";
 import { LeadSubmission } from "../types";
 
 interface AdminPortalProps {
@@ -13,17 +13,43 @@ interface AdminPortalProps {
   onClose: () => void;
 }
 
+const SESSION_UNLOCK_KEY = "lottus_admin_unlocked";
+// NOTE: this is a client-side deterrent only, not real access control — the
+// passcode ships inside the JS bundle and can be read by anyone who opens
+// devtools. It stops casual visitors from browsing/deleting leads through the
+// UI; it does not stop a determined attacker. Real protection requires the
+// leads to live behind a server-side authenticated endpoint instead of
+// localStorage.
+const ADMIN_PASSCODE = import.meta.env.VITE_ADMIN_PASSCODE as string | undefined;
+
 export default function AdminPortal({ isOpen, onClose }: AdminPortalProps) {
   const [leads, setLeads] = useState<LeadSubmission[]>([]);
+  const [unlocked, setUnlocked] = useState(
+    () => sessionStorage.getItem(SESSION_UNLOCK_KEY) === "true"
+  );
+  const [passwordInput, setPasswordInput] = useState("");
+  const [authError, setAuthError] = useState("");
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && unlocked) {
       const storedLeads = localStorage.getItem("lottus_design_leads");
       if (storedLeads) {
         setLeads(JSON.parse(storedLeads));
       }
     }
-  }, [isOpen]);
+  }, [isOpen, unlocked]);
+
+  const handleUnlock = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (ADMIN_PASSCODE && passwordInput === ADMIN_PASSCODE) {
+      sessionStorage.setItem(SESSION_UNLOCK_KEY, "true");
+      setUnlocked(true);
+      setAuthError("");
+      setPasswordInput("");
+    } else {
+      setAuthError("Incorrect passcode.");
+    }
+  };
 
   const handleDelete = (id: string) => {
     const updatedLeads = leads.filter((lead) => lead.id !== id);
@@ -166,7 +192,46 @@ ${rawContent}
 
             {/* Lead Entries Listing & Export Tools */}
             <div className="p-6 md:p-8 overflow-y-auto flex-1 relative z-10 space-y-6">
-              
+
+              {!unlocked ? (
+                <div className="flex flex-col items-center justify-center h-full py-16 space-y-5 text-center">
+                  <div className="bg-[#FAF9F7]/5 p-4 rounded-full border border-[#FAF9F7]/10">
+                    <Lock className="w-8 h-8 text-gold-accent stroke-[1.2]" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="font-serif text-md text-champagne">Restricted Access</p>
+                    <p className="font-sans text-xs text-logo-grey max-w-sm">
+                      Enter the administrative passcode to view client inquiries.
+                    </p>
+                  </div>
+                  {!ADMIN_PASSCODE ? (
+                    <p className="font-sans text-xs text-red-400 max-w-sm">
+                      No passcode configured (VITE_ADMIN_PASSCODE). Access is disabled until it is set.
+                    </p>
+                  ) : (
+                    <form onSubmit={handleUnlock} className="flex flex-col items-center space-y-3 w-full max-w-xs">
+                      <input
+                        type="password"
+                        value={passwordInput}
+                        onChange={(e) => setPasswordInput(e.target.value)}
+                        placeholder="Passcode"
+                        autoFocus
+                        className="w-full bg-white border border-logo-grey/25 py-2.5 px-4 font-sans text-xs rounded-xs text-rich-black focus:outline-none focus:border-gold-accent transition-all"
+                      />
+                      {authError && (
+                        <p className="font-sans text-[10px] text-red-400">{authError}</p>
+                      )}
+                      <button
+                        type="submit"
+                        className="bg-gold-accent hover:bg-champagne text-charcoal py-2 px-6 font-sans text-[10px] tracking-widest uppercase font-semibold transition-all rounded-xs w-full"
+                      >
+                        Unlock
+                      </button>
+                    </form>
+                  )}
+                </div>
+              ) : (
+              <>
               {/* Site Export Box */}
               <div className="bg-[#242424] border border-gold-accent/20 p-5 rounded-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div className="space-y-1 max-w-xl">
@@ -276,6 +341,8 @@ ${rawContent}
                     ))}
                   </div>
                 </div>
+              )}
+              </>
               )}
             </div>
 
