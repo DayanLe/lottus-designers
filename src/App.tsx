@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from "react";
-import { motion, useScroll, useTransform } from "motion/react";
+import React, { useState, useEffect, lazy, Suspense } from "react";
+import { m } from "motion/react";
 import { Calendar, Compass, Phone, Sparkles, ChevronDown } from "lucide-react";
 import { useLanguage } from "./context/LanguageContext";
 
@@ -20,52 +20,70 @@ import TestimonialsSection from "./components/TestimonialsSection";
 import ProcessSection from "./components/ProcessSection";
 import InstagramSection from "./components/InstagramSection";
 import ContactSection from "./components/ContactSection";
-import AdminPortal from "./components/AdminPortal";
 import Footer from "./components/Footer";
+import { publicUrl, unsplashSrcSet } from "./images";
 
-// @ts-ignore
-import luxuryHeroImg from "./assets/images/luxury_hero_event_1783970688999.jpg";
+// Admin portal is only opened via a hidden gesture, so keep it out of the main bundle
+const AdminPortal = lazy(() => import("./components/AdminPortal"));
+
+const PRELOADER_SEEN_KEY = "lottus_intro_seen";
+
+// The intro overlay plays once per session and never for reduced-motion users.
+// The page renders underneath it from the start so the hero is not delayed.
+function shouldShowIntro() {
+  try {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return false;
+    if (sessionStorage.getItem(PRELOADER_SEEN_KEY)) return false;
+    sessionStorage.setItem(PRELOADER_SEEN_KEY, "1");
+  } catch {
+    // storage blocked: just show the intro
+  }
+  return true;
+}
 
 export default function App() {
   const { t, stats } = useLanguage();
-  const [loading, setLoading] = useState(true);
+  const [showIntro] = useState(shouldShowIntro);
+  const [introDone, setIntroDone] = useState(!showIntro);
   const [adminOpen, setAdminOpen] = useState(false);
+  const [adminRequested, setAdminRequested] = useState(false);
   const [counts, setCounts] = useState([0, 0, 0, 0]);
 
+  const openAdmin = () => {
+    setAdminRequested(true);
+    setAdminOpen(true);
+  };
 
-  // Handle scroll trigger to increment stats counters elegantly
+  // Count the stats up once the section enters the viewport. IntersectionObserver
+  // avoids reading layout on every scroll event (which forced reflows on mobile).
   useEffect(() => {
-    if (loading) return;
+    const statsSection = document.getElementById("stats-section");
+    if (!statsSection) return;
 
-    const handleScrollForStats = () => {
-      const statsSection = document.getElementById("stats-section");
-      if (statsSection) {
-        const rect = statsSection.getBoundingClientRect();
-        const isInViewport = rect.top <= window.innerHeight && rect.bottom >= 0;
+    let interval: number | undefined;
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries.some((e) => e.isIntersecting)) return;
+      observer.disconnect();
 
-        if (isInViewport) {
-          // Softly transition counters to their final value
-          const targets = [500, 250, 10, 100];
-          const increments = targets.map((t) => Math.ceil(t / 40));
-          
-          const interval = setInterval(() => {
-            setCounts((prev) =>
-              prev.map((val, idx) => {
-                if (val >= targets[idx]) return targets[idx];
-                return Math.min(val + increments[idx], targets[idx]);
-              })
-            );
-          }, 40);
+      // Softly transition counters to their final value
+      const targets = [500, 250, 10, 100];
+      const increments = targets.map((t) => Math.ceil(t / 40));
 
-          // Remove scroll listener after counting completes
-          window.removeEventListener("scroll", handleScrollForStats);
-        }
-      }
+      interval = window.setInterval(() => {
+        setCounts((prev) => {
+          const next = prev.map((val, idx) => Math.min(val + increments[idx], targets[idx]));
+          if (next.every((val, idx) => val === targets[idx])) window.clearInterval(interval);
+          return next;
+        });
+      }, 40);
+    });
+
+    observer.observe(statsSection);
+    return () => {
+      observer.disconnect();
+      window.clearInterval(interval);
     };
-
-    window.addEventListener("scroll", handleScrollForStats);
-    return () => window.removeEventListener("scroll", handleScrollForStats);
-  }, [loading]);
+  }, []);
 
   const scrollToSection = (id: string) => {
     const element = document.querySelector(id);
@@ -76,25 +94,32 @@ export default function App() {
 
   return (
     <>
-      {/* 1. Premium Slow Preloader */}
-      <Preloader onComplete={() => setLoading(false)} />
+      {/* 1. Premium intro overlay (first visit only, does not block rendering) */}
+      {!introDone && <Preloader onComplete={() => setIntroDone(true)} />}
 
-      {!loading && (
-        <div className="bg-warm-white min-h-screen text-rich-black relative selection:bg-gold-accent/20 selection:text-gold-accent">
+      <div className="bg-warm-white min-h-screen text-rich-black relative selection:bg-gold-accent/20 selection:text-gold-accent">
           
           {/* 2. Transparent to Translucent Sticky Navigation */}
-          <Navbar onAdminClick={() => setAdminOpen(true)} />
+          <Navbar onAdminClick={openAdmin} />
 
           {/* 3. Hero Section: Cinematic Autoplay Video and Overlays */}
           <section id="hero" className="relative h-screen flex items-center justify-center overflow-hidden bg-charcoal">
             {/* Cinematic Background Image */}
             <div className="absolute inset-0 z-0 select-none pointer-events-none">
-              <img
-                src={luxuryHeroImg}
-                alt="Luxury wedding reception tablescape design"
-                className="w-full h-full object-cover transform scale-100 transition-transform duration-1000"
-                referrerPolicy="no-referrer"
-              />
+              <picture>
+                <source media="(max-width: 767px)" srcSet={publicUrl("images/hero-mobile.webp")} />
+                <img
+                  src={publicUrl("images/hero-1376.webp")}
+                  srcSet={`${publicUrl("images/hero-960.webp")} 960w, ${publicUrl("images/hero-1376.webp")} 1376w`}
+                  sizes="100vw"
+                  width={1376}
+                  height={768}
+                  alt="Luxury wedding reception tablescape design"
+                  className="w-full h-full object-cover"
+                  fetchPriority="high"
+                  decoding="async"
+                />
+              </picture>
               {/* Premium dark vignette overlay with gold atmospheric notes */}
               <div className="absolute inset-0 bg-gradient-to-b from-charcoal/85 via-charcoal/50 to-charcoal/90" />
               <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#C8A76B]/10 via-transparent to-transparent opacity-60" />
@@ -104,7 +129,7 @@ export default function App() {
             <div className="relative z-10 max-w-5xl mx-auto px-6 text-center text-warm-white flex flex-col items-center space-y-8" id="hero-main-header">
               
               {/* Monogram or spark tag */}
-              <motion.div
+              <m.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.3, duration: 0.8 }}
@@ -114,7 +139,7 @@ export default function App() {
                 <span className="font-sans text-[9px] md:text-[10px] tracking-[0.3em] uppercase text-gold-accent font-semibold">
                   {t("heroTag")}
                 </span>
-              </motion.div>
+              </m.div>
 
               {/* Master Headline */}
               <h1 className="text-4xl md:text-6xl lg:text-7xl font-serif tracking-tight leading-[1.1] text-champagne max-w-4xl font-medium">
@@ -156,13 +181,13 @@ export default function App() {
               <span className="font-sans text-[8px] uppercase tracking-[0.4em] font-medium">
                 {t("heroScrollIndicator")}
               </span>
-              <motion.div
+              <m.div
                 className="w-5 h-8 border border-logo-grey/40 rounded-full flex justify-center p-1"
                 animate={{ y: [0, 6, 0] }}
                 transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
               >
                 <div className="w-1 h-1.5 bg-gold-accent rounded-full" />
-              </motion.div>
+              </m.div>
             </div>
           </section>
 
@@ -175,14 +200,14 @@ export default function App() {
           {/* 6. Cinematic Showcase: Secondary Video Overlay section */}
           <section id="cinematic-reel" className="relative h-[65vh] flex items-center justify-center overflow-hidden bg-charcoal text-center text-warm-white">
             <div className="absolute inset-0 z-0 pointer-events-none select-none">
-              <video
-                autoPlay
-                muted
-                loop
-                playsInline
-                className="w-full h-full object-cover transform scale-100"
-                src="https://assets.mixkit.co/videos/preview/mixkit-decorating-a-gorgeous-wedding-hall-with-flowers-43110-large.mp4"
-                poster="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&q=80&w=1200"
+              <img
+                src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&q=80&w=1200"
+                srcSet={unsplashSrcSet("https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&q=80&w=1200")}
+                sizes="100vw"
+                alt=""
+                className="w-full h-full object-cover"
+                loading="lazy"
+                decoding="async"
               />
               {/* Deep charcoal protective masks */}
               <div className="absolute inset-0 bg-gradient-to-r from-charcoal/90 via-charcoal/70 to-charcoal/90" />
@@ -251,10 +276,12 @@ export default function App() {
             <div className="absolute inset-0 z-0 pointer-events-none select-none">
               <img
                 src="https://images.unsplash.com/photo-1519225495810-7512c696505a?auto=format&fit=crop&q=80&w=1600"
+                srcSet={unsplashSrcSet("https://images.unsplash.com/photo-1519225495810-7512c696505a?auto=format&fit=crop&q=80&w=1600", [400, 640, 960, 1600])}
+                sizes="100vw"
                 alt="Magical candlelit reception tables under hanging lights"
                 className="w-full h-full object-cover"
                 loading="lazy"
-                referrerPolicy="no-referrer"
+                decoding="async"
               />
               <div className="absolute inset-0 bg-charcoal/85" />
               <div className="absolute inset-0 bg-gradient-to-t from-charcoal via-transparent to-charcoal/80" />
@@ -292,13 +319,16 @@ export default function App() {
           <ContactSection />
 
           {/* 16. Multi-Column Minimal Footer */}
-          <Footer onAdminClick={() => setAdminOpen(true)} />
+          <Footer onAdminClick={openAdmin} />
 
           {/* 17. Hidden Lead Admin Management Portal Modal */}
-          <AdminPortal isOpen={adminOpen} onClose={() => setAdminOpen(false)} />
+          {adminRequested && (
+            <Suspense fallback={null}>
+              <AdminPortal isOpen={adminOpen} onClose={() => setAdminOpen(false)} />
+            </Suspense>
+          )}
 
         </div>
-      )}
     </>
   );
 }

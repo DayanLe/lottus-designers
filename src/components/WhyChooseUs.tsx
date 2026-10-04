@@ -4,7 +4,7 @@
  */
 
 import React from "react";
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import { useLanguage } from "../context/LanguageContext";
 import {
   Heart,
@@ -73,7 +73,7 @@ export default function WhyChooseUs() {
         {/* Reasons Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8" id="why-choose-us-grid">
           {reasons.map((reason, index) => (
-            <motion.div
+            <m.div
               key={reason.id}
               className="bg-white p-8 border border-logo-grey/10 flex flex-col justify-between transition-all duration-500 rounded-xs hover:border-[#C8A76B]/30 hover:shadow-md group"
               initial={{ opacity: 0, y: 20 }}
@@ -100,7 +100,7 @@ export default function WhyChooseUs() {
                   {reason.description}
                 </p>
               </div>
-            </motion.div>
+            </m.div>
           ))}
         </div>
       </div>

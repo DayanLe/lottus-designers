@@ -4,10 +4,11 @@
  */
 
 import React from "react";
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import { useLanguage } from "../context/LanguageContext";
 import { INSTAGRAM_ITEMS } from "../data";
 import { Instagram, Heart, MessageCircle } from "lucide-react";
+import { unsplashSrcSet } from "../images";
 
 export default function InstagramSection() {
   const { language } = useLanguage();
@@ -30,7 +31,7 @@ export default function InstagramSection() {
         {/* 6-Column Responsive Feed Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4" id="instagram-grid">
           {INSTAGRAM_ITEMS.map((item, index) => (
-            <motion.div
+            <m.div
               key={item.id}
               className="relative aspect-square overflow-hidden group cursor-pointer bg-charcoal rounded-xs shadow-xs border border-logo-grey/10"
               initial={{ opacity: 0, y: 20 }}
@@ -41,6 +42,9 @@ export default function InstagramSection() {
               {/* Image */}
               <img
                 src={item.imageUrl}
+                srcSet={unsplashSrcSet(item.imageUrl, [200, 400])}
+                sizes="(min-width: 1024px) 16vw, (min-width: 768px) 33vw, 50vw"
+                decoding="async"
                 alt={`Instagram highlight ${item.id}`}
                 className="w-full h-full object-cover transform scale-100 transition-transform duration-700 ease-out group-hover:scale-105"
                 loading="lazy"
@@ -64,7 +68,7 @@ export default function InstagramSection() {
                   </span>
                 </div>
               </div>
-            </motion.div>
+            </m.div>
           ))}
         </div>
 

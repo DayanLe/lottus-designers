@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { m, AnimatePresence } from "motion/react";
 import { X, Trash2, Download, ExternalLink, CalendarDays, Inbox, ShieldCheck, FileCode, Globe, Lock } from "lucide-react";
 import { LeadSubmission } from "../types";
 
@@ -128,14 +128,14 @@ ${rawContent}
   return (
     <AnimatePresence>
       {isOpen && (
-        <motion.div
+        <m.div
           id="admin-portal-modal"
           className="fixed inset-0 bg-charcoal/98 z-[999999] flex items-center justify-center p-4 md:p-8 backdrop-blur-md"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
-          <motion.div
+          <m.div
             className="bg-[#1E1E1E] border border-gold-accent/25 w-full max-w-5xl h-[85vh] flex flex-col justify-between overflow-hidden shadow-2xl relative text-warm-white rounded-xs"
             initial={{ scale: 0.95, y: 20 }}
             animate={{ scale: 1, y: 0 }}
@@ -364,8 +364,8 @@ ${rawContent}
               </button>
             </div>
 
-          </motion.div>
-        </motion.div>
+          </m.div>
+        </m.div>
       )}
     </AnimatePresence>
   );

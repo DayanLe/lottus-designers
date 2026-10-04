@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { m, AnimatePresence } from "motion/react";
 import { useLanguage } from "../context/LanguageContext";
 import { Mail, Phone, MapPin, Loader2, Sparkles, CheckCircle2 } from "lucide-react";
 import { LeadSubmission } from "../types";
@@ -354,7 +354,7 @@ export default function ContactSection() {
               {/* Success Overlay Reveal */}
               <AnimatePresence>
                 {success && (
-                  <motion.div
+                  <m.div
                     id="success-overlay"
                     className="absolute inset-0 bg-charcoal text-warm-white flex flex-col justify-center items-center p-8 text-center z-10"
                     initial={{ opacity: 0, scale: 0.95 }}
@@ -362,7 +362,7 @@ export default function ContactSection() {
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.5 }}
                   >
-                    <motion.div
+                    <m.div
                       className="space-y-6 max-w-md"
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -388,8 +388,8 @@ export default function ContactSection() {
                           {language === "en" ? "Submit New Questionnaire" : "Enviar Nuevo Cuestionario"}
                         </button>
                       </div>
-                    </motion.div>
-                  </motion.div>
+                    </m.div>
+                  </m.div>
                 )}
               </AnimatePresence>
 

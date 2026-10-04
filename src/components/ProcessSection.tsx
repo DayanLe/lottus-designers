@@ -4,7 +4,7 @@
  */
 
 import React from "react";
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import { PROCESS_STEPS } from "../data";
 
 export default function ProcessSection() {
@@ -42,7 +42,7 @@ export default function ProcessSection() {
             {PROCESS_STEPS.map((step, index) => {
               const isEven = index % 2 === 0;
               return (
-                <motion.div
+                <m.div
                   key={step.number}
                   className={`flex flex-col md:flex-row items-stretch ${
                     isEven ? "md:flex-row-reverse" : ""
@@ -89,7 +89,7 @@ export default function ProcessSection() {
                     </div>
                   </div>
 
-                </motion.div>
+                </m.div>
               );
             })}
           </div>

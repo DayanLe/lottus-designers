@@ -4,10 +4,11 @@
  */
 
 import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { m, AnimatePresence } from "motion/react";
 import { useLanguage } from "../context/LanguageContext";
 import { CATEGORY_TRANSLATIONS } from "../translations";
 import { X, ChevronLeft, ChevronRight, ZoomIn } from "lucide-react";
+import { unsplashSrcSet } from "../images";
 
 export default function FeaturedGallery() {
   const { t, language, galleryItems } = useLanguage();
@@ -136,7 +137,7 @@ export default function FeaturedGallery() {
                   >
                     {filterLabel}
                     {activeFilter === filter && (
-                      <motion.div
+                      <m.div
                         layoutId="activeFilterUnderline"
                         className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-gold-accent"
                         transition={{ type: "spring", stiffness: 380, damping: 30 }}
@@ -164,7 +165,7 @@ export default function FeaturedGallery() {
                 {filteredItems.map((item, idx) => {
                   const itemCategoryLabel = CATEGORY_TRANSLATIONS[item.category]?.[language] || item.category;
                   return (
-                    <motion.div
+                    <m.div
                       key={item.id}
                       layout
                       initial={{ opacity: 0, x: 50 }}
@@ -178,6 +179,9 @@ export default function FeaturedGallery() {
                       {/* Image */}
                       <img
                         src={item.url}
+                        srcSet={unsplashSrcSet(item.url, [400, 640, 800])}
+                        sizes="(min-width: 768px) 380px, (min-width: 640px) 320px, 280px"
+                        decoding="async"
                         alt={item.title}
                         className="w-full h-full object-cover transform scale-100 transition-transform duration-[1200ms] ease-out group-hover:scale-105"
                         loading="lazy"
@@ -209,7 +213,7 @@ export default function FeaturedGallery() {
                       <div className="absolute top-4 right-4 bg-warm-white/90 backdrop-blur-xs text-rich-black py-1 px-3 rounded-xs text-[8px] uppercase tracking-widest font-semibold border border-logo-grey/10 group-hover:opacity-0 transition-opacity duration-300">
                         {itemCategoryLabel}
                       </div>
-                    </motion.div>
+                    </m.div>
                   );
                 })}
               </AnimatePresence>
@@ -268,7 +272,7 @@ export default function FeaturedGallery() {
     {/* Lightbox Modal */}
     <AnimatePresence>
         {lightboxIndex !== null && (
-          <motion.div
+          <m.div
             id="gallery-lightbox"
             className="fixed inset-0 bg-charcoal/95 z-[99999] flex flex-col items-center justify-between py-6 px-4 md:px-12 text-warm-white select-none backdrop-blur-md"
             initial={{ opacity: 0 }}
@@ -306,7 +310,7 @@ export default function FeaturedGallery() {
               </button>
 
               {/* Core Image Display with custom reveal motion */}
-              <motion.div
+              <m.div
                 key={lightboxIndex}
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -316,11 +320,13 @@ export default function FeaturedGallery() {
               >
                 <img
                   src={filteredItems[lightboxIndex].url}
+                  srcSet={unsplashSrcSet(filteredItems[lightboxIndex].url)}
+                  sizes="90vw"
                   alt={filteredItems[lightboxIndex].title}
                   className="max-w-full max-h-[65vh] object-contain rounded-xs border border-logo-grey/10 shadow-2xl"
                   referrerPolicy="no-referrer"
                 />
-              </motion.div>
+              </m.div>
 
               {/* Next Button */}
               <button
@@ -351,7 +357,7 @@ export default function FeaturedGallery() {
                 ))}
               </div>
             </div>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </>

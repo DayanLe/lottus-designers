@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Menu, X, Phone } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
+import { m, AnimatePresence } from "motion/react";
 import Logo from "./Logo";
 import { useLanguage } from "../context/LanguageContext";
 
@@ -20,15 +20,10 @@ export default function Navbar({ onAdminClick }: NavbarProps) {
   const [logoClicks, setLogoClicks] = useState(0);
 
   useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 50) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 50);
 
-    window.addEventListener("scroll", handleScroll);
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -188,7 +183,7 @@ export default function Navbar({ onAdminClick }: NavbarProps) {
       {/* Mobile Drawer Overlay */}
       <AnimatePresence>
         {mobileMenuOpen && (
-          <motion.div
+          <m.div
             id="mobile-drawer-overlay"
             className="fixed inset-0 bg-charcoal z-40 lg:hidden flex flex-col justify-between pt-24 pb-12 px-8 text-warm-white"
             initial={{ opacity: 0, x: "100%" }}
@@ -202,7 +197,7 @@ export default function Navbar({ onAdminClick }: NavbarProps) {
 
             <div className="flex flex-col space-y-6 my-auto" id="mobile-nav-links">
               {navLinks.map((link, idx) => (
-                <motion.button
+                <m.button
                   key={link.label}
                   onClick={() => scrollToSection(link.href)}
                   className="font-serif text-3xl text-left text-champagne hover:text-gold-accent transition-colors tracking-wide py-1 cursor-pointer"
@@ -211,10 +206,10 @@ export default function Navbar({ onAdminClick }: NavbarProps) {
                   transition={{ delay: 0.1 * idx, duration: 0.4 }}
                 >
                   {link.label}
-                </motion.button>
+                </m.button>
               ))}
 
-              <motion.button
+              <m.button
                 onClick={() => scrollToSection("#contact")}
                 className="mt-8 border border-gold-accent text-gold-accent px-6 py-4 text-xs tracking-[0.25em] uppercase hover:bg-gold-accent hover:text-charcoal transition-all text-center w-full cursor-pointer"
                 initial={{ opacity: 0, y: 10 }}
@@ -222,7 +217,7 @@ export default function Navbar({ onAdminClick }: NavbarProps) {
                 transition={{ delay: 0.6 }}
               >
                 {t("heroCtaBook")}
-              </motion.button>
+              </m.button>
             </div>
 
             {/* Footer coordinates inside drawer */}
@@ -232,7 +227,7 @@ export default function Navbar({ onAdminClick }: NavbarProps) {
                 Medellín, Colombia • info@lottusdesigners.com
               </p>
             </div>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </>

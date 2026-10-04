@@ -4,7 +4,7 @@
  */
 
 import React from "react";
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import { useLanguage } from "../context/LanguageContext";
 import {
   Sparkles,
@@ -73,7 +73,7 @@ export default function ServicesSection() {
         {/* Services Card Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8" id="services-grid">
           {services.map((service, index) => (
-            <motion.div
+            <m.div
               key={service.id}
               className="bg-white border border-logo-grey/15 p-8 flex flex-col justify-between transition-all duration-500 rounded-xs hover:shadow-lg hover:border-gold-accent/40 group relative overflow-hidden"
               initial={{ opacity: 0, y: 30 }}
@@ -109,7 +109,7 @@ export default function ServicesSection() {
                 </span>
                 <span className="text-gold-accent text-xs font-light">→</span>
               </div>
-            </motion.div>
+            </m.div>
           ))}
         </div>
       </div>

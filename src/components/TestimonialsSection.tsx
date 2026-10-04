@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { m, AnimatePresence } from "motion/react";
 import { useLanguage } from "../context/LanguageContext";
 import { Quote, Star, ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -59,7 +59,7 @@ export default function TestimonialsSection() {
         {activeTestimonial && (
           <div className="min-h-[250px] flex items-center justify-center">
             <AnimatePresence mode="wait">
-              <motion.div
+              <m.div
                 key={index}
                 initial={{ opacity: 0, scale: 0.95, y: 15 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -97,7 +97,7 @@ export default function TestimonialsSection() {
                     </p>
                   </div>
                 </div>
-              </motion.div>
+              </m.div>
             </AnimatePresence>
           </div>
         )}

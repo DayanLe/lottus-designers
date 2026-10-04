@@ -4,9 +4,10 @@
  */
 
 import React, { useRef, useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { m, AnimatePresence } from "motion/react";
 import { useLanguage } from "../context/LanguageContext";
 import { ChevronLeft, ChevronRight, MapPin, Sparkles } from "lucide-react";
+import { unsplashSrcSet } from "../images";
 
 export default function PortfolioHighlights() {
   const { t, language, portfolioHighlights } = useLanguage();
@@ -73,7 +74,7 @@ export default function PortfolioHighlights() {
           {/* Left Side: Text and Metadata Details */}
           <div className="lg:col-span-5 space-y-6 lg:pr-6 ordered-2 lg:order-1">
             <AnimatePresence mode="wait">
-              <motion.div
+              <m.div
                 key={currentIndex}
                 initial={{ opacity: 0, x: -30 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -117,7 +118,7 @@ export default function PortfolioHighlights() {
                     <span className="text-xs">→</span>
                   </a>
                 </div>
-              </motion.div>
+              </m.div>
             </AnimatePresence>
           </div>
 
@@ -129,9 +130,12 @@ export default function PortfolioHighlights() {
               
               <div className="aspect-[16/10] overflow-hidden bg-[#1E1E1E]">
                 <AnimatePresence mode="wait">
-                  <motion.img
+                  <m.img
                     key={currentIndex}
                     src={currentProject.imageUrl}
+                    srcSet={unsplashSrcSet(currentProject.imageUrl)}
+                    sizes="(min-width: 1024px) 58vw, 100vw"
+                    decoding="async"
                     alt={currentProject.title}
                     initial={{ opacity: 0, scale: 1.05 }}
                     animate={{ opacity: 1, scale: 1 }}

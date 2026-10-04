@@ -4,11 +4,10 @@
  */
 
 import React from "react";
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import { useLanguage } from "../context/LanguageContext";
 import { Check } from "lucide-react";
-// @ts-ignore
-import foundersPortraitImg from "../assets/images/team_portrait_clean_1783972299399.jpg";
+import { publicUrl } from "../images";
 
 export default function AboutSection() {
   const { t, brandStory } = useLanguage();
@@ -32,7 +31,7 @@ export default function AboutSection() {
             {/* Elegant double offset border representing luxury frames */}
             <div className="absolute -inset-4 border border-gold-accent/20 translate-x-3 translate-y-3 rounded-xs pointer-events-none transition-transform duration-700 group-hover:translate-x-1 group-hover:translate-y-1" />
             
-            <motion.div
+            <m.div
               className="relative aspect-[3/4] overflow-hidden bg-charcoal shadow-xl rounded-xs border border-logo-grey/10"
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -41,7 +40,12 @@ export default function AboutSection() {
             >
               {/* Premium Team Portrait Image */}
               <img
-                src={foundersPortraitImg}
+                src={publicUrl("images/team-896.webp")}
+                srcSet={`${publicUrl("images/team-480.webp")} 480w, ${publicUrl("images/team-896.webp")} 896w`}
+                sizes="(min-width: 1024px) 40vw, 100vw"
+                width={896}
+                height={1200}
+                decoding="async"
                 alt="Lottus Designers Founders and Event Planning Team"
                 className="w-full h-full object-cover object-top transform scale-100 transition-transform duration-[2000ms] ease-out group-hover:scale-105"
                 loading="lazy"
@@ -58,12 +62,12 @@ export default function AboutSection() {
                   Medellín, Colombia
                 </p>
               </div>
-            </motion.div>
+            </m.div>
           </div>
 
           {/* Right Side: Narrative Copy */}
           <div className="lg:col-span-7 flex flex-col justify-center" id="about-text-content">
-            <motion.div
+            <m.div
               initial={{ opacity: 0, x: 40 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true, margin: "-100px" }}
@@ -120,7 +124,7 @@ export default function AboutSection() {
                   </p>
                 </div>
               </div>
-            </motion.div>
+            </m.div>
           </div>
 
         </div>
